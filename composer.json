@@ -3,7 +3,7 @@
     "description": "N/A",
     "require": {
         "php": "~5.5.0|~5.6.0|~7.0.0|~7.1.0|~7.2.0",
-        "magento/framework": "100.0.*",
+        "magento/framework": ">=1.0.0",
         "netzexpert/module-productconfigurator": ">=1.0.0",
         "amasty/shippingtablerates": ">=1.4.14"
     },
