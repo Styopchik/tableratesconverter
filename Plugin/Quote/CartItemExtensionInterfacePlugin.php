@@ -62,7 +62,10 @@ class CartItemExtensionInterfacePlugin
             $item = $itemExtension->getParent();
             $itemOptionCode = Configurator::CONFIGURATOR_OPTION_PREFIX . $option->getId();
             $itemOption = $item->getOptionByCode($itemOptionCode);
-            return $attribute->getSource()->getOptionId($itemOption->getValue());
+            if ($itemOption) {
+                return $attribute->getSource()->getOptionId($itemOption->getValue());
+            }
+            return $result;
         } catch (NoSuchEntityException $exception) {
             $this->logger->error($exception->getMessage());
             return $result;
