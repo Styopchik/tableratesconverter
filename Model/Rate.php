@@ -7,15 +7,15 @@
 
 namespace Netzexpert\TableRatesConverter\Model;
 
-use Amasty\ShippingTableRates\Helper\Data;
 use Amasty\ShippingTableRates\Helper\Config as HelperConfig;
+use Amasty\ShippingTableRates\Model\ConfigProvider;
 use Amasty\ShippingTableRates\Model\Rate as AmastyRate;
+use Amasty\ShippingTableRates\Model\Rate\ItemsTotalCalculator;
+use Amasty\ShippingTableRates\Model\Rate\ItemValidator;
+use Amasty\ShippingTableRates\Model\ResourceModel\Method\CollectionFactory as MethodCollectionFactory;
 use Amasty\ShippingTableRates\Model\ResourceModel\Rate\CollectionFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\Filesystem\Driver\File;
 use Magento\Framework\Model\Context;
-use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Registry;
 use Magento\Quote\Api\Data\CartItemExtensionInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
@@ -24,45 +24,49 @@ use Magento\Store\Model\ScopeInterface;
 
 class Rate extends AmastyRate
 {
+    /** @var ProductRepositoryInterface  */
     private $productRepository;
-    
+
+    /** @var HelperConfig  */
     private $helperConfig;
+
+
+
 
     /**
      * Rate constructor.
      * @param Registry $coreRegistry
-     * @param Data $helper
-     * @param HelperConfig $helperConfig
-     * @param ObjectManagerInterface $objectManager
-     * @param ScopeConfigInterface $scopeConfig
-     * @param File $file
      * @param Context $context
      * @param ProductRepositoryInterface $productRepository
-     * @param CollectionFactory $collectionFactory
+     * @param CollectionFactory $rateCollectionFactory
+     * @param MethodCollectionFactory $methodCollectionFactory
+     * @param ConfigProvider $configProvider
+     * @param ItemsTotalCalculator $itemsTotalCalculator
+     * @param ItemValidator $itemValidator
+     * @param HelperConfig $helperConfig
      */
     public function __construct(
         Registry $coreRegistry,
-        Data $helper,
-        HelperConfig $helperConfig,
-        ObjectManagerInterface $objectManager,
-        ScopeConfigInterface $scopeConfig,
-        File $file,
         Context $context,
         ProductRepositoryInterface $productRepository,
-        CollectionFactory $collectionFactory
+        CollectionFactory $rateCollectionFactory,
+        MethodCollectionFactory $methodCollectionFactory,
+        ConfigProvider $configProvider,
+        ItemsTotalCalculator $itemsTotalCalculator,
+        ItemValidator $itemValidator,
+        HelperConfig $helperConfig
     ) {
         $this->productRepository    = $productRepository;
         $this->helperConfig         = $helperConfig;
-        parent::__construct(
+        AmastyRate::__construct(
             $coreRegistry,
-            $helper,
-            $helperConfig,
-            $objectManager,
-            $scopeConfig,
-            $file,
             $context,
             $productRepository,
-            $collectionFactory
+            $rateCollectionFactory,
+            $methodCollectionFactory,
+            $configProvider,
+            $itemsTotalCalculator,
+            $itemValidator
         );
     }
 
@@ -91,6 +95,7 @@ class Rate extends AmastyRate
      * @param int $shippingType
      *
      * @return array
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     protected function calculateTotals($request, $ignoreVirtual, $allowFreePromo, $shippingType)
     {
@@ -143,7 +148,7 @@ class Rate extends AmastyRate
                 $itemQty = 0;
 
                 foreach ($item->getChildren() as $child) {
-                    $product = $this->_objectManager->create('Magento\Catalog\Model\Product')->load(
+                    $product = $this->productRepository->getById(
                         $child->getProduct()->getEntityId()
                     );
 
@@ -216,7 +221,7 @@ class Rate extends AmastyRate
                 }
             } else {
                 /** @var \Magento\Catalog\Model\Product $product */
-                $product = $this->_objectManager->create('Magento\Catalog\Model\Product')->load(
+                $product = $this->productRepository->getById(
                     $item->getProduct()->getEntityId()
                 );
 
@@ -277,6 +282,7 @@ class Rate extends AmastyRate
      * @param \Magento\Quote\Model\Quote\Item $item
      *
      * @return float
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     private function calculateWeight($item = null)
     {
@@ -303,6 +309,7 @@ class Rate extends AmastyRate
      * @param array $selectedWeightAttributeCodes
      *
      * @return float|int
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     private function prepareVolumeWeight($productId = 0, $selectedWeightAttributeCodes = [])
     {
