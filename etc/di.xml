@@ -5,4 +5,8 @@
         <plugin name="getShipnentType"
                 type="Netzexpert\TableRatesConverter\Plugin\Quote\CartItemExtensionInterfacePlugin" />
     </type>
+    <type name="Amasty\ShippingTableRates\Block\Onepage\LayoutProcessor">
+        <plugin name="disableChangeTemplateForStorePickup"
+                type="Netzexpert\TableRatesConverter\Plugin\Block\Onepage\LayoutProcessorPlugin" />
+    </type>
 </config>
