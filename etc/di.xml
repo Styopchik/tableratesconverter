@@ -9,4 +9,12 @@
         <plugin name="disableChangeTemplateForStorePickup"
                 type="Netzexpert\TableRatesConverter\Plugin\Block\Onepage\LayoutProcessorPlugin" />
     </type>
+    <type name="Amasty\ShippingTableRates\Model\Rate\ItemValidator">
+        <plugin name="validateShippingTypeBasedOnProductOptions"
+                type="Netzexpert\TableRatesConverter\Plugin\Model\Rate\ItemValidatorPlugin" />
+    </type>
+    <type name="Magento\SalesRule\Model\Rule\Condition\Product">
+        <plugin name="apply_rule_on_configurator"
+                type="Netzexpert\TableRatesConverter\Plugin\SalesRule\Model\Rule\Condition\ProductPlugin" />
+    </type>
 </config>
