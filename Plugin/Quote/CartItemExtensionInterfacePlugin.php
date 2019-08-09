@@ -52,6 +52,9 @@ class CartItemExtensionInterfacePlugin
     public function afterGetShipmentType(CartItemExtensionInterface $itemExtension, $result)
     {
         try {
+            if (!$itemExtension->getParent()) {
+                return $result;
+            }
             $option = $this->optionRepository->getByCode('am_shipping_type');
             /** @var Attribute $attribute */
             $attribute = $this->attributeRepository->get(
